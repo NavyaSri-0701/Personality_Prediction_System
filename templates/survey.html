@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Personality Assessment Survey</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #e3f2fd, #ffffff);
+      font-family: 'Segoe UI', sans-serif;
+      padding-top: 40px;
+    }
+
+    .survey-card, .result-box {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.15);
+      max-width: 900px;
+      margin: auto;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    .form-label {
+      font-weight: 600;
+    }
+
+    .form-control {
+      border-radius: 10px;
+      padding: 10px;
+      border: 1.5px solid #b3d7ff;
+    }
+
+    .btn-submit {
+      background-color: #0d6efd;
+      color: white;
+      font-weight: 600;
+      padding: 12px 30px;
+      border-radius: 25px;
+      border: none;
+    }
+
+    .btn-submit:hover {
+      background-color: #0b5ed7;
+      box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    }
+
+    .download-btn {
+      background-color: #198754;
+      color: white;
+      font-weight: 600;
+      padding: 12px 30px;
+      border-radius: 25px;
+      border: none;
+      margin-top: 20px;
+    }
+
+    .download-btn:hover {
+      background-color: #157347;
+      box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+    }
+
+    .icon-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .list-group-item {
+      background-color: #f8f9fa;
+      border: none;
+    }
+
+    .progress {
+      height: 20px;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      transition: width 1s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 class="text-center mb-4 text-primary fw-bold">🧠 Personality & Skill Assessment</h2>
+
+    {% if not prediction %}
+      <div class="survey-card">
+        <form method="POST" id="surveyForm">
+          <div class="progress">
+            <div id="progressBar" class="progress-bar bg-primary" style="width: 0%;"></div>
+          </div>
+          {% for q in questions %}
+            <div class="mb-4">
+              <label class="form-label icon-label">
+                <i class="fas fa-question-circle text-primary"></i> {{ q['text'] }} (1 to 10)
+              </label>
+              <input type="number" class="form-control" name="{{ q['name'] }}" min="1" max="10" required oninput="updateProgress()">
+            </div>
+          {% endfor %}
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-submit">Submit and Predict</button>
+          </div>
+        </form>
+      </div>
+    {% else %}
+      <div class="result-box text-center">
+        <h4 class="mb-3 text-success">🎉 You belong to: <strong>{{ prediction }}</strong></h4>
+
+        {% if prediction %}
+          <h5 class="mb-3 text-dark">Prediction Result</h5>
+          <h6 class="text-muted">Suggested Roles for You:</h6>
+          <ul class="list-group list-group-flush mb-4">
+            {% for role in suggested_roles %}
+              <li class="list-group-item"><i class="fas fa-user-tie text-primary me-2"></i>{{ role }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <form method="GET" action="/download-candidate-report">
+          <button type="submit" class="download-btn">
+            <i class="fas fa-download me-2"></i>Download Your Report
+          </button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    function updateProgress() {
+      const inputs = document.querySelectorAll("input[type='number']");
+      const filled = Array.from(inputs).filter(i => i.value).length;
+      const percent = (filled / inputs.length) * 100;
+      document.getElementById("progressBar").style.width = percent + "%";
+    }
+  </script>
+
+</body>
+</html>

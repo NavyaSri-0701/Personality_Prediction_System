@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User Login</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #a3d5ff, #3a9bdc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    #wave-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .login-container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 40px 30px 50px;
+      border-radius: 15px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 400px;
+      color: #0b2e6f;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      font-size: 2rem;
+      color: #0366d6;
+    }
+
+    .form-group {
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 40px 14px 14px;
+      font-size: 16px;
+      border: 2px solid #a3d5ff;
+      border-radius: 8px;
+      background: #e8f4ff;
+      color: #0b2e6f;
+      outline: none;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+    }
+
+    input[type="text"]::placeholder,
+    input[type="password"]::placeholder {
+      color: transparent;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #0366d6;
+      background-color: #d4eaff;
+      box-shadow: 0 0 8px #0366d6aa;
+    }
+
+    label {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      color: #547aaf;
+      font-size: 16px;
+      pointer-events: none;
+      transition: 0.3s ease all;
+      background: transparent;
+      padding: 0 4px;
+      border-radius: 4px;
+    }
+
+    input:focus + label,
+    input:not(:placeholder-shown) + label {
+      top: -12px;
+      left: 10px;
+      font-size: 12px;
+      color: #0366d6;
+      font-weight: 600;
+      background: #e8f4ff;
+    }
+
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #547aaf;
+      user-select: none;
+      font-size: 18px;
+      transition: color 0.3s ease;
+      z-index: 10;
+    }
+
+    .toggle-password:hover {
+      color: #0366d6;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      background: #0366d6;
+      color: #fff;
+      border: none;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 15px #0366d6cc;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+      background: #024ea2;
+      box-shadow: 0 8px 20px #024ea2cc;
+    }
+
+    .message {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #cc3333;
+      display: none;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #0b2e6f;
+    }
+
+    .register-link a {
+      color: #0366d6;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    @media(max-width: 480px) {
+      .login-container {
+        padding: 30px 20px 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="wave-canvas"></canvas>
+
+  <div class="login-container" role="main" aria-label="User Login Form">
+    <h2>User Login</h2>
+    <div id="message" class="message"></div>
+    <form method="POST" novalidate>
+      <div class="form-group">
+        <input type="text" name="username" id="username" placeholder=" " required autocomplete="username" />
+        <label for="username">Username</label>
+      </div>
+
+      <div class="form-group" style="position:relative;">
+        <input type="password" name="password" id="password" placeholder=" " required autocomplete="current-password" />
+        <label for="password">Password</label>
+        <span class="toggle-password" id="togglePassword" aria-label="Toggle password visibility" role="button" tabindex="0">&#128065;</span>
+      </div>
+
+      <input type="submit" value="Login" />
+
+      <div class="register-link">
+        No account?
+        <a href="/register">Register here</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    togglePassword.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      togglePassword.textContent = type === 'password' ? '\u{1F441}' : '\u{1F576}';
+    });
+
+    togglePassword.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        togglePassword.click();
+      }
+    });
+
+    document.querySelector('form').addEventListener('submit', e => {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const messageDiv = document.getElementById('message');
+      if (!username || !password) {
+        e.preventDefault();
+        messageDiv.style.display = 'block';
+        messageDiv.textContent = 'Please fill in both username and password.';
+      } else {
+        messageDiv.style.display = 'none';
+      }
+    });
+
+    // Wave canvas setup
+    const canvas = document.getElementById('wave-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let waves = [];
+
+    function Wave(amplitude, wavelength, speed, phase, color) {
+      this.amplitude = amplitude;
+      this.wavelength = wavelength;
+      this.speed = speed;
+      this.phase = phase;
+      this.color = color;
+
+      this.draw = function(time) {
+        ctx.beginPath();
+        ctx.moveTo(0, height);
+        for (let x = 0; x <= width; x++) {
+          const y = this.amplitude * Math.sin((2 * Math.PI / this.wavelength) * (x + this.speed * time) + this.phase) + height * 0.8;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(width, height);
+        ctx.closePath();
+
+        const gradient = ctx.createLinearGradient(0, height * 0.8, 0, height);
+        gradient.addColorStop(0, this.color);
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+    }
+
+    function setup() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+
+      waves = [
+        new Wave(20, 300, 0.03, 0, 'rgba(33, 150, 243, 0.4)'),
+        new Wave(25, 200, 0.02, Math.PI / 2, 'rgba(3, 169, 244, 0.5)'),
+        new Wave(30, 150, 0.01, Math.PI, 'rgba(0, 122, 204, 0.6)')
+      ];
+    }
+
+    function animate(time = 0) {
+      ctx.clearRect(0, 0, width, height);
+      waves.forEach(wave => wave.draw(time));
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', setup);
+    setup();
+    animate();
+  </script>
+</body>
+</html>

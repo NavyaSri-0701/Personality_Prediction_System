@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Login</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #e6e6fa, #d8c4f2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    #wave-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .admin-login-container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 40px 30px 50px;
+      border-radius: 15px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      color: #3c2769;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .admin-login-container h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 700;
+      font-size: 2rem;
+      color: #6c4fb5;
+    }
+
+    .form-group {
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 12px;
+      font-size: 16px;
+      border: 2px solid #cbb8ec;
+      border-radius: 8px;
+      background: #f3edff;
+      color: #3c2769;
+      outline: none;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+    }
+
+    input[type="text"]::placeholder,
+    input[type="password"]::placeholder {
+      color: transparent;
+    }
+
+    input:focus {
+      border-color: #6c4fb5;
+      background-color: #e8dbff;
+      box-shadow: 0 0 8px #6c4fb599;
+    }
+
+    label {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      color: #695e89;
+      font-size: 16px;
+      pointer-events: none;
+      transition: 0.3s ease all;
+      background: transparent;
+      padding: 0 4px;
+      border-radius: 4px;
+    }
+
+    input:focus + label,
+    input:not(:placeholder-shown) + label {
+      top: -12px;
+      left: 10px;
+      font-size: 12px;
+      color: #6c4fb5;
+      font-weight: 600;
+      background: #f3edff;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      background: #6c4fb5;
+      color: #fff;
+      border: none;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 15px #6c4fb5aa;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+      background: #5a3fa0;
+      box-shadow: 0 8px 20px #5a3fa0aa;
+    }
+
+    @media(max-width: 480px) {
+      .admin-login-container {
+        padding: 30px 20px 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="wave-canvas"></canvas>
+
+  <div class="admin-login-container" role="main" aria-label="Admin Login Form">
+    <h2>Admin Login</h2>
+    <form method="POST" novalidate>
+      <div class="form-group">
+        <input type="text" name="username" id="username" placeholder=" " required autocomplete="username" />
+        <label for="username">Username</label>
+      </div>
+
+      <div class="form-group">
+        <input type="password" name="password" id="password" placeholder=" " required autocomplete="current-password" />
+        <label for="password">Password</label>
+      </div>
+
+      <input type="submit" value="Login as Admin" />
+    </form>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('wave-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let waves = [];
+
+    function Wave(amplitude, wavelength, speed, phase, color) {
+      this.amplitude = amplitude;
+      this.wavelength = wavelength;
+      this.speed = speed;
+      this.phase = phase;
+      this.color = color;
+
+      this.draw = function(time) {
+        ctx.beginPath();
+        ctx.moveTo(0, height);
+        for (let x = 0; x <= width; x++) {
+          const y = this.amplitude * Math.sin((2 * Math.PI / this.wavelength) * (x + this.speed * time) + this.phase) + height * 0.8;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(width, height);
+        ctx.closePath();
+
+        const gradient = ctx.createLinearGradient(0, height * 0.8, 0, height);
+        gradient.addColorStop(0, this.color);
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+    }
+
+    function setup() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+
+      waves = [
+        new Wave(20, 300, 0.03, 0, 'rgba(204, 204, 255, 0.3)'),
+        new Wave(25, 200, 0.02, Math.PI / 2, 'rgba(179, 156, 255, 0.4)'),
+        new Wave(30, 150, 0.01, Math.PI, 'rgba(153, 102, 255, 0.5)')
+      ];
+    }
+
+    function animate(time = 0) {
+      ctx.clearRect(0, 0, width, height);
+      waves.forEach(wave => wave.draw(time));
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', setup);
+    setup();
+    animate();
+  </script>
+</body>
+</html>

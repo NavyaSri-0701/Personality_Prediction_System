@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #fff4e6;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #5a3e1b;
+      padding-bottom: 20px;
+    }
+    .navbar {
+  background-color: #ff6600;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(255, 102, 0, 0.2);
+  padding: 0.75rem 2rem;
+  margin: 10px 20px; /* adds breathing room */
+}
+
+
+    .navbar-brand, .logout-btn {
+      color: #fff9f1 !important;
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+    .logout-btn {
+      border: 2px solid #fff9f1;
+      padding: 5px 15px;
+      border-radius: 5px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .logout-btn:hover {
+      background-color: #fff9f1;
+      color: #d35400 !important;
+      text-decoration: none;
+    }
+    h3.section-title {
+      color: #a75d07;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 1px 0 #e9c89b;
+    }
+    .btn-warm {
+      background-color: #ff6600;
+      color: #fff9f1;
+      border-radius: 30px;
+      font-weight: 600;
+      padding: 10px 20px;
+      transition: background-color 0.3s ease;
+      border: none;
+    }
+    .btn-warm:hover {
+      background-color: #e65500;
+      color: #fff9f1;
+      box-shadow: 0 4px 8px rgba(230, 85, 0, 0.6);
+    }
+    .summary-cards .card {
+      background: #fbe9d7;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
+      transition: transform 0.3s ease;
+      color: #8a4b0e;
+    }
+    .summary-cards .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgb(230 120 10 / 0.3);
+    }
+    table {
+      background: #fff9f1;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+    }
+    th {
+      cursor: pointer;
+      color: #b25b00;
+    }
+    td, th {
+      vertical-align: middle !important;
+    }
+    .badge-approved {
+      background: linear-gradient(to right, #ff8800, #e67300);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 5px rgba(255, 136, 0, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-pending {
+      background-color: #f39c12;
+      color: #4a2c00;
+      font-weight: 600;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+    .action-link {
+      color: #d35400;
+      cursor: pointer;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    .action-link:hover {
+      color: #a84300;
+    }
+    input.form-control {
+      border-radius: 30px;
+      border: 2px solid #ff6600;
+      padding-left: 20px;
+      color: #5a3e1b;
+      font-weight: 500;
+    }
+    input.form-control::placeholder {
+      color: #c76c1a;
+      font-style: italic;
+    }
+    .toggle-buttons {
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 1rem;
+    }
+    .table-responsive {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgb(0 0 0 / 0.07);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg px-4">
+  <a class="navbar-brand" href="#">Admin Dashboard</a>
+  <div class="ms-auto">
+    <a href="/logout" class="logout-btn">Logout</a>
+  </div>
+</nav>
+
+<div class="container mt-4">
+
+  <!-- Summary Cards -->
+  <div class="row summary-cards text-center mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card p-3">
+        <h5>Total HRs</h5>
+        <p class="fs-3 fw-bold">{{ users | selectattr('role', 'equalto', 'hr') | list | length }}</p>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card p-3">
+        <h5>Total Candidates</h5>
+        <p class="fs-3 fw-bold">{{ users | selectattr('role', 'equalto', 'candidate') | list | length }}</p>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card p-3">
+        <h5>Pending Requests</h5>
+        <p class="fs-3 fw-bold">{{ requests | selectattr('approved', 'equalto', False) | list | length }}</p>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card p-3">
+        <h5>Approved Requests</h5>
+        <p class="fs-3 fw-bold">{{ requests | selectattr('approved', 'equalto', True) | list | length }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requests Table -->
+  <div class="mb-5">
+    <h3 class="section-title">Survey Requests</h3>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle" id="requestsTable">
+        <thead class="table-light">
+          <tr>
+            <th onclick="sortTable(0, 'requestsTable')">Request ID &#8597;</th>
+            <th onclick="sortTable(1, 'requestsTable')">HR ID &#8597;</th>
+            <th>Status</th>
+            <th>Access Code</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests %}
+          <tr>
+            <td>{{ req.id }}</td>
+            <td>{{ req.hr_id }}</td>
+            <td>
+              {% if req.approved %}
+                <span class="badge badge-approved"><i class="bi bi-check-circle-fill"></i> Approved</span>
+              {% else %}
+                <span class="badge badge-pending">Pending</span>
+              {% endif %}
+            </td>
+            <td>{{ req.access_code or "-" }}</td>
+            <td>
+              {% if not req.approved %}
+                <span class="action-link" onclick="confirmApprove({{ req.id }})">Approve</span>
+              {% else %}
+                &mdash;
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Toggle Buttons -->
+  <div class="toggle-buttons">
+    <button class="btn-warm" onclick="toggleSection('candidatesSection')">Toggle Candidates</button>
+    <button class="btn-warm" onclick="toggleSection('hrsSection')">Toggle HRs</button>
+  </div>
+
+  <!-- Candidate List -->
+  <div id="candidatesSection" style="display:none;">
+    <h3 class="section-title">Candidates</h3>
+    <input type="text" class="form-control mb-3" placeholder="Search candidates..." onkeyup="filterTableRows('candidatesTable', this.value)" />
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered table-striped" id="candidatesTable">
+        <thead class="table-light">
+          <tr>
+            <th onclick="sortTable(0, 'candidatesTable')">Username &#8597;</th>
+            <th onclick="sortTable(1, 'candidatesTable')">Email &#8597;</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users if user.role == 'candidate' %}
+          <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- HR List -->
+  <div id="hrsSection" style="display:none;">
+    <h3 class="section-title">HRs</h3>
+    <input type="text" class="form-control mb-3" placeholder="Search HRs..." onkeyup="filterTableRows('hrsTable', this.value)" />
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped" id="hrsTable">
+        <thead class="table-light">
+          <tr>
+            <th onclick="sortTable(0, 'hrsTable')">Username &#8597;</th>
+            <th onclick="sortTable(1, 'hrsTable')">Email &#8597;</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users if user.role == 'hr' %}
+          <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Approval Modal -->
+<div class="modal fade" id="confirmApproveModal" tabindex="-1" aria-labelledby="confirmApproveLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 15px;">
+      <div class="modal-header" style="background-color:#ff6600; color:#fff9f1;">
+        <h5 class="modal-title" id="confirmApproveLabel">Confirm Approval</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to approve this request?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <a id="confirmApproveBtn" href="#" class="btn btn-warm rounded-pill">Approve</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function sortTable(colIndex, tableId) {
+    const table = document.getElementById(tableId);
+    const rows = Array.from(table.tBodies[0].rows);
+    const asc = table.getAttribute("data-sort-dir") !== "asc";
+    rows.sort((a, b) => {
+      const valA = a.cells[colIndex].innerText.trim().toLowerCase();
+      const valB = b.cells[colIndex].innerText.trim().toLowerCase();
+      return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+    rows.forEach(row => table.tBodies[0].appendChild(row));
+    table.setAttribute("data-sort-dir", asc ? "asc" : "desc");
+  }
+
+  function filterTableRows(tableId, query) {
+    const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+    query = query.toLowerCase();
+    rows.forEach(row => {
+      const match = [...row.cells].some(cell =>
+        cell.textContent.toLowerCase().includes(query)
+      );
+      row.style.display = match ? "" : "none";
+    });
+  }
+
+  function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    section.style.display = section.style.display === "none" ? "block" : "none";
+  }
+
+  function confirmApprove(id) {
+    const approveBtn = document.getElementById("confirmApproveBtn");
+    approveBtn.href = `/approve_request/${id}`;
+    const modal = new bootstrap.Modal(document.getElementById("confirmApproveModal"));
+    modal.show();
+  }
+</script>
+</body>
+</html>

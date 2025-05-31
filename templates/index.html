@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Personality Cluster Predictor</title>
+    <style>
+        body { font-family: Arial; margin: 40px; background-color: #f0f0f0; }
+        form { background: #fff; padding: 20px; border-radius: 10px; width: 600px; margin: auto; }
+        input { margin-bottom: 10px; width: 100%; padding: 8px; }
+        .result { font-weight: bold; color: green; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2 align="center">Enter Your Scores</h2>
+    <form method="POST">
+        {% for field in [
+            'EXT', 'EST', 'AGR', 'CSN', 'OPN',
+            'Technical_Skills', 'Communication_Skills', 'Experience_Years',
+            'Education_Level', 'Certifications', 'Leadership_Score',
+            'Adaptability_Score', 'Analytical_Thinking',
+            'Teamwork_Score', 'Project_Management'
+        ] %}
+            <label>{{ field.replace("_", " ") }}</label><br>
+            <input type="number" name="{{ field }}" step="any" required><br>
+        {% endfor %}
+        <input type="submit" value="Predict">
+    </form>
+
+    {% if prediction %}
+        <div class="result">You belong to: {{ prediction }}</div>
+    {% endif %}
+</body>
+</html>

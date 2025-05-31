@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enter Access Code</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #eaf6ff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #1f3b57;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 1rem;
+    }
+
+    .access-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0, 123, 255, 0.15);
+      padding: 2rem 2.5rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h2 {
+      font-weight: 700;
+      color: #0d6efd;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+      border-radius: 25px;
+      border: 1.5px solid #b3d7ff;
+      padding-left: 20px;
+      font-weight: 500;
+      color: #1f3b57;
+    }
+
+    .form-control::placeholder {
+      color: #7daee3;
+    }
+
+    .btn-submit {
+      background-color: #0d6efd;
+      color: #ffffff;
+      border-radius: 25px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #0b5ed7;
+      box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+    }
+
+    .logout-link {
+      margin-top: 1rem;
+      display: inline-block;
+      color: #0d6efd;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    .error-message {
+      color: red;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="access-card">
+    <h2>Enter Access Code</h2>
+
+    {% if error %}
+      <div class="error-message">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+      <div class="mb-3">
+        <input type="text" class="form-control" name="access_code" placeholder="4-digit code" required maxlength="4" pattern="\d{4}">
+      </div>
+      <button type="submit" class="btn btn-submit w-100">Submit</button>
+    </form>
+
+    <a href="/logout" class="logout-link">Logout</a>
+  </div>
+
+</body>
+</html>
